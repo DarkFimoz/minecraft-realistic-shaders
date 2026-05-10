@@ -49,6 +49,6 @@ vec3 getCelestialColor() {
 }
 
 void main() {
-    vec3 color = getCelestialColor();
-    gl_FragData[0] = vec4(color, texture2D(texture, texcoord).a * color.a);
+    vec3 finalColor = getCelestialColor();
+    gl_FragData[0] = vec4(finalColor, texture2D(texture, texcoord).a * color.a);
 }
