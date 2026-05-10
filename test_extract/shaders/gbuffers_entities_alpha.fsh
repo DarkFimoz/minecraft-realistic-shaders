@@ -1,6 +1,6 @@
 #version 120
 
-uniform sampler2D gtexture;
+uniform sampler2D texture;
 uniform sampler2D shadow;
 
 varying vec2 texcoord;
@@ -35,7 +35,7 @@ float getShadow() {
 }
 
 void main() {
-    vec4 texColor = texture2D(gtexture, texcoord) * color;
+    vec4 texColor = texture2D(texture, texcoord) * color;
     float shadowFactor = getShadow();
     
     gl_FragData[0] = texColor * shadowFactor;
