@@ -33,7 +33,7 @@ Realistic shader pack for Minecraft 1.20-1.21.11 with OptiFine and Iris support.
 
 ## Version
 
-Current version: 1.0.1
+Current version: 1.0.2
 
 ## License
 

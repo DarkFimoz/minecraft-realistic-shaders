@@ -2,9 +2,6 @@
 
 uniform sampler2D colortex0;
 uniform sampler2D depthtex0;
-uniform sampler2D colortex1;
-uniform float frameTimeCounter;
-uniform vec2 texelSize;
 uniform mat4 gbufferProjectionInverse;
 uniform mat4 gbufferPreviousProjection;
 uniform mat4 gbufferPreviousModelView;
@@ -14,10 +11,14 @@ uniform vec3 previousCameraPosition;
 
 varying vec2 texcoord;
 
-#define MOTION_BLUR_STRENGTH 0.5
+const float MOTION_BLUR_STRENGTH = 0.5;
 
 vec3 getMotionBlur(vec2 coord) {
     float depth = texture2D(depthtex0, coord).r;
+    
+    if (depth > 0.9999) {
+        return texture2D(colortex0, coord).rgb;
+    }
     
     vec4 currentPos = vec4(coord * 2.0 - 1.0, depth * 2.0 - 1.0, 1.0);
     vec4 viewPos = gbufferProjectionInverse * currentPos;
@@ -31,20 +32,24 @@ vec3 getMotionBlur(vec2 coord) {
     previousPos = previousPos * 0.5 + 0.5;
     
     vec2 velocity = (coord - previousPos.xy) * MOTION_BLUR_STRENGTH;
+    float velocityLength = length(velocity);
     
-    vec3 color = vec3(0.0);
-    int samples = 8;
+    if (velocityLength < 0.001) {
+        return texture2D(colortex0, coord).rgb;
+    }
+    
+    vec3 colorSum = vec3(0.0);
+    int samples = 5;
     
     for (int i = 0; i < samples; i++) {
         vec2 offset = velocity * (float(i) / float(samples - 1) - 0.5);
-        color += texture2D(colortex0, coord + offset).rgb;
+        colorSum += texture2D(colortex0, coord + offset).rgb;
     }
     
-    return color / float(samples);
+    return colorSum / float(samples);
 }
 
 void main() {
-    vec3 color = getMotionBlur(texcoord);
-    gl_FragData[0] = vec4(color, 1.0);
-    gl_FragData[1] = texture2D(colortex0, texcoord);
+    vec3 finalColor = getMotionBlur(texcoord);
+    gl_FragData[0] = vec4(finalColor, 1.0);
 }
